@@ -1,0 +1,29 @@
+steps:
+  # 1. VM에 코드 복사
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - compute
+      - scp
+      - '--recurse'
+      - './*'
+      - 'upbit-mock-trading:/home/$BUILDER_USERNAME/upbit_mock_trading'
+      - '--zone=asia-northeast3-a'
+
+  # 2. VM에서 환경 설정 및 실행
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - compute
+      - ssh
+      - upbit-mock-trading
+      - '--zone=asia-northeast3-a'
+      - '--command'
+      - |
+        sudo apt update
+        sudo apt install -y python3-pip python3-venv nginx
+        if [ ! -d "/home/$BUILDER_USERNAME/upbit_mock_trading/venv" ]; then
+          python3 -m venv /home/$BUILDER_USERNAME/upbit_mock_trading/venv
+        fi
+        source /home/$BUILDER_USERNAME/upbit_mock_trading/venv/bin/activate
+        pip install -r /home/$BUILDER_USERNAME/upbit_mock_trading/requirements.txt
+        sudo systemctl stop upbit_mock || true
+        sudo systemctl start upbit_mock
