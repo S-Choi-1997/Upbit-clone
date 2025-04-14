@@ -1,0 +1,6 @@
+flask==2.3.3
+pyupbit==0.2.33
+flask-jwt-extended==4.5.0
+flask-sqlalchemy==3.0.5
+pandas==2.0.3
+gunicorn==21.2.0
