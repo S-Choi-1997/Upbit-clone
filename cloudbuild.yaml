@@ -1,6 +1,3 @@
-logging: CLOUD_LOGGING_ONLY
-
-# VM 환경 설정
 
 steps:
   # 1. VM에 코드 복사
