@@ -1,42 +1,7 @@
-# options:
-#   logging: CLOUD_LOGGING_ONLY
 steps:
-  # 1. VM에 코드 복사
-  - name: 'gcr.io/cloud-builders/gcloud'
+  - name: 'gcr.io/cloud-builders/bash'
+    entrypoint: 'bash'
     args:
-      - compute
-      - scp
-      - '--recurse'
-      - './*'
-      - 'upbit:/home/$_VM_USERNAME/upbit_mock_trading'
-      - '--zone=us-central1-c'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
-
-  # 2. VM에서 환경 설정 및 실행
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - compute
-      - ssh
-      - upbit
-      - '--zone=us-central1-c'
-      - '--command'
+      - -c
       - |
-        # 디렉토리 확인 및 생성
-        mkdir -p /home/$_VM_USERNAME/upbit_mock_trading
-        # 가상환경 생성 (없을 경우)
-        if [ ! -d "/home/$_VM_USERNAME/upbit_mock_trading/venv" ]; then
-          python3 -m venv /home/$_VM_USERNAME/upbit_mock_trading/venv
-        fi
-        # 의존성 설치
-        /home/$_VM_USERNAME/upbit_mock_trading/venv/bin/pip install -r /home/$_VM_USERNAME/upbit_mock_trading/requirements.txt
-        # 서비스 재시작
-        sudo systemctl stop upbit_mock || true
-        sudo systemctl start upbit_mock
-        sudo systemctl status upbit_mock --no-pager
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
-
-# 환경 변수 기본값
-substitutions:
-  _VM_USERNAME: infra_steve_03  # 실제 VM 사용자 이름으로 변경
+        echo "아주 간단한 테스트 빌드다햄!"
