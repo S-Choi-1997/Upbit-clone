@@ -6,24 +6,35 @@ steps:
       - scp
       - '--recurse'
       - './*'
-      - 'upbit-mock-trading:/home/$BUILDER_USERNAME/upbit_mock_trading'
-      - '--zone=asia-northeast3-a'
+      - 'upbit:/home/$_VM_USERNAME/upbit_mock_trading'
+      - '--zone=us-central1-c'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
 
   # 2. VM에서 환경 설정 및 실행
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - compute
       - ssh
-      - upbit-mock-trading
-      - '--zone=asia-northeast3-a'
+      - upbit
+      - '--zone=us-central1-c'
       - '--command'
       - |
-        sudo apt update
-        sudo apt install -y python3-pip python3-venv nginx
-        if [ ! -d "/home/$BUILDER_USERNAME/upbit_mock_trading/venv" ]; then
-          python3 -m venv /home/$BUILDER_USERNAME/upbit_mock_trading/venv
+        # 디렉토리 확인 및 생성
+        mkdir -p /home/$_VM_USERNAME/upbit_mock_trading
+        # 가상환경 생성 (없을 경우)
+        if [ ! -d "/home/$_VM_USERNAME/upbit_mock_trading/venv" ]; then
+          python3 -m venv /home/$_VM_USERNAME/upbit_mock_trading/venv
         fi
-        source /home/$BUILDER_USERNAME/upbit_mock_trading/venv/bin/activate
-        pip install -r /home/$BUILDER_USERNAME/upbit_mock_trading/requirements.txt
+        # 의존성 설치
+        /home/$_VM_USERNAME/upbit_mock_trading/venv/bin/pip install -r /home/$_VM_USERNAME/upbit_mock_trading/requirements.txt
+        # 서비스 재시작
         sudo systemctl stop upbit_mock || true
         sudo systemctl start upbit_mock
+        sudo systemctl status upbit_mock --no-pager
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+
+# 환경 변수 기본값
+substitutions:
+  _VM_USERNAME: infra_steve_03  # 실제 VM 사용자 이름으로 변경
